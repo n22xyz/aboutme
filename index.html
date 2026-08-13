@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nima Payam — Pharm.D Candidate & CADD Researcher</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['Vazirmatn', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; position: relative; }
+        
+        /* Background Canvas */
+        #cadd-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Content Layer over Canvas */
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Typography for Persian RTL */
+        .lang-fa { font-family: 'Vazirmatn', sans-serif !important; direction: rtl; }
+        .lang-fa p { line-height: 2 !important; }
+        .lang-fa h1, .lang-fa h2, .lang-fa h3 { font-family: 'Vazirmatn', sans-serif !important; }
+
+        /* Dark / Light Mode Styles */
+        .dark body { background-color: #060911; color: #cbd5e1; }
+        .dark .card-bg { background-color: rgba(13, 19, 33, 0.82); border-color: #1f2937; backdrop-filter: blur(10px); }
+        .dark .text-primary { color: #f9fafb; }
+        .dark .text-secondary { color: #9ca3af; }
+
+        html:not(.dark) body { background-color: #f8fafc; color: #334155; }
+        html:not(.dark) .card-bg { background-color: rgba(255, 255, 255, 0.88); border-color: #e2e8f0; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        html:not(.dark) .text-primary { color: #0f172a; }
+        html:not(.dark) .text-secondary { color: #475569; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between transition-colors duration-200">
+
+    <!-- Background Canvas -->
+    <canvas id="cadd-canvas"></canvas>
+
+    <!-- Content Container Layer -->
+    <div class="content-layer max-w-3xl mx-auto px-6 py-8 min-h-screen flex flex-col justify-between w-full">
+
+        <!-- Top Navigation & Live Clock -->
+        <header class="flex justify-between items-center text-xs sm:text-sm mb-10 pb-4 border-b border-gray-800 dark:border-gray-800/80">
+            <!-- Clock Typography -->
+            <div id="live-clock" class="font-mono text-brand-500 font-bold tracking-wider text-xs sm:text-sm">--:--:-- --</div>
+            
+            <div class="flex items-center gap-2 sm:gap-3 font-sans text-xs sm:text-sm">
+                <!-- Soft Blue Molecule Toggle Button -->
+                <button onclick="toggleMolecules()" id="mol-toggle-btn" class="transition-all duration-300 px-3 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-400 font-medium flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
+                    <span>⚛️</span> <span id="mol-toggle-text">Molecules On</span>
+                </button>
+                <span class="text-gray-600">|</span>
+                <button onclick="toggleLanguage()" id="lang-btn" class="hover:text-brand-500 font-semibold transition px-2.5 py-1 rounded bg-brand-500/10 text-brand-500">فارسی</button>
+                <span class="text-gray-600">|</span>
+                <button onclick="toggleTheme()" id="theme-btn" class="hover:text-brand-500 font-medium transition flex items-center gap-1.5">
+                    <span>☀️ Light Mode</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="space-y-8 flex-1">
+            
+            <!-- Header Profile & Photo -->
+            <section class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-emerald-600 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-300"></div>
+                    <img src="profile.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Nima+Payam&background=10b981&color=fff&size=128'" alt="Nima Payam" class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-brand-500 shadow-xl">
+                </div>
+
+                <div class="space-y-2">
+                    <div class="inline-block px-3 py-1 text-xs font-mono bg-brand-500/10 text-brand-500 border border-brand-500/20 rounded-full">
+                        Pharm.D & CADD Researcher
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-primary tracking-tight">Nima Payam</h1>
+                    <p class="text-sm sm:text-base text-brand-500 font-semibold" id="sub-title">Pharm.D Candidate & Computational Drug Discovery Researcher</p>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section class="card-bg border rounded-2xl p-6 sm:p-7 space-y-4">
+                <h2 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2">
+                    <span class="text-brand-500 font-mono">>_</span> <span id="about-title">About Me</span>
+                </h2>
+                <div id="about-text" class="text-sm sm:text-base leading-relaxed text-secondary space-y-4">
+                    <p>
+                        As a Pharm.D. candidate at Mazandaran University of Medical Sciences, I stand at the intersection of pharmaceutical sciences and computer science. My journey began with a passion for chemical logic—leading to my qualification as a National Chemistry Olympiad Semi-Finalist—and has evolved into Computational Drug Discovery (CADD).
+                    </p>
+                    <p>
+                        I don't just memorize drug structures; I aim to design them using algorithms. I leverage Python, Pandas, and RDKit to transition from traditional "wet lab" approaches to modern "in-silico" methodologies.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Current Focus -->
+            <section class="card-bg border rounded-2xl p-6 sm:p-7 space-y-4">
+                <h2 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2">
+                    <span class="text-brand-500">⚡</span> <span id="focus-title">Current Focus & Research</span>
+                </h2>
+                <ul id="focus-list" class="text-xs sm:text-sm text-secondary space-y-2 list-disc list-inside">
+                    <li>Authoring a comprehensive <strong class="text-primary">Organic Chemistry textbook</strong> tailored for pharmacy students.</li>
+                    <li>Investigating <strong class="text-primary">In-Silico target binding</strong> methods with the Student Research Committee.</li>
+                    <li>Developing automated data parsing pipelines using Python and RDKit.</li>
+                </ul>
+            </section>
+
+            <!-- Live Updates Feed (Dynamic from posts/posts.json) -->
+            <section class="card-bg border rounded-2xl p-6 sm:p-7 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2">
+                        <span class="text-brand-500">📌</span> <span id="updates-title">Latest Updates & Notes</span>
+                    </h2>
+                    <span id="live-feed-badge" class="text-xs font-mono text-brand-500 font-semibold">● Live Feed</span>
+                </div>
+                
+                <div id="posts-container" class="space-y-4 text-sm">
+                    <div class="text-xs text-secondary animate-pulse">Loading updates...</div>
+                </div>
+            </section>
+
+            <!-- Experience & Research -->
+            <section class="card-bg border rounded-2xl p-6 sm:p-7 space-y-6">
+                <h2 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2">
+                    <span class="text-brand-500">💼</span> <span id="experience-title">Experience & Research</span>
+                </h2>
+                <div id="experience-list" class="space-y-6 text-sm">
+                    <div class="border-l-2 border-brand-500 pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-2 space-y-1.5">
+                        <div class="text-base font-bold text-primary">Pharm.D Candidate & Student Researcher</div>
+                        <div class="text-xs sm:text-sm text-brand-500 font-medium">Mazandaran University of Medical Sciences</div>
+                        <p class="text-secondary text-xs sm:text-sm leading-relaxed">Focus on CADD, RDKit, molecular modeling, and authoring an Organic Chemistry textbook.</p>
+                        <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">Sep 2024 – Present</span>
+                    </div>
+
+                    <div class="border-l-2 border-gray-700 pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-2 space-y-1.5">
+                        <div class="text-base font-bold text-primary">Founder & Content Lead</div>
+                        <div class="text-xs sm:text-sm text-brand-500 font-medium">Chemical Mood (Educational Community)</div>
+                        <p class="text-secondary text-xs sm:text-sm leading-relaxed">Open-access platform for organic chemistry guides and national entrance exam mentorship.</p>
+                        <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">Jul 2024 – Present</span>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 pt-6 border-t border-gray-800/80 text-xs sm:text-sm text-secondary flex flex-wrap justify-between items-center gap-4">
+            <div>© <span id="current-year">2026</span> Nima Payam</div>
+            <div class="flex items-center gap-4 sm:gap-5 font-sans">
+                <a href="https://github.com/n22xyz" target="_blank" class="hover:text-brand-500 font-medium transition">GitHub</a>
+                <a href="https://linkedin.com/in/nima-payam" target="_blank" class="hover:text-brand-500 font-medium transition">LinkedIn</a>
+                <a href="mailto:nima.payam2004@gmail.com" class="hover:text-brand-500 font-medium transition">Email</a>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Canvas Engine & Interactive Scripts -->
+    <script>
+        // --- Canvas Molecule Engine (Exactly Original Code) ---
+        const canvas = document.getElementById('cadd-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let waterMolecules = [];
+        let mouse = { x: -1000, y: -1000 };
+        let moleculesActive = true;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initMolecules();
+        }
+        window.addEventListener('resize', resize);
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        class WaterMolecule {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.radius = 3.5;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                let dx = this.x - mouse.x;
+                let dy = this.y - mouse.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                let hydrophobicZone = 90;
+
+                if (dist < hydrophobicZone) {
+                    let force = (hydrophobicZone - dist) / hydrophobicZone;
+                    let angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * force * 4;
+                    this.y += Math.sin(angle) * force * 4;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+
+            draw(isDark) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = isDark ? 'rgba(239, 68, 68, 0.35)' : 'rgba(220, 38, 38, 0.55)';
+                ctx.fill();
+
+                let h1x = this.x + Math.cos(this.angle) * 6;
+                let h1y = this.y + Math.sin(this.angle) * 6;
+                let h2x = this.x + Math.cos(this.angle + 1.8) * 6;
+                let h2y = this.y + Math.sin(this.angle + 1.8) * 6;
+
+                ctx.beginPath();
+                ctx.arc(h1x, h1y, 1.8, 0, Math.PI * 2);
+                ctx.arc(h2x, h2y, 1.8, 0, Math.PI * 2);
+                ctx.fillStyle = isDark ? 'rgba(248, 250, 252, 0.5)' : 'rgba(51, 65, 85, 0.65)';
+                ctx.fill();
+            }
+        }
+
+        function initMolecules() {
+            waterMolecules = [];
+            let count = Math.floor((width * height) / 11000);
+            for (let i = 0; i < count; i++) {
+                waterMolecules.push(new WaterMolecule());
+            }
+        }
+
+        function drawMicroLigand(x, y, isDark) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.9)' : 'rgba(5, 150, 105, 0.9)';
+            ctx.fillStyle = isDark ? 'rgba(16, 185, 129, 0.95)' : 'rgba(5, 150, 105, 0.95)';
+            ctx.lineWidth = 1.8;
+
+            let r = 9;
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                let a = (Math.PI / 3) * i;
+                let px = r * Math.cos(a);
+                let py = r * Math.sin(a);
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            const isDark = document.documentElement.classList.contains('dark');
+
+            if (moleculesActive) {
+                for (let i = 0; i < waterMolecules.length; i++) {
+                    waterMolecules[i].update();
+                    waterMolecules[i].draw(isDark);
+
+                    for (let j = i + 1; j < waterMolecules.length; j++) {
+                        let dx = waterMolecules[i].x - waterMolecules[j].x;
+                        let dy = waterMolecules[i].y - waterMolecules[j].y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 60) {
+                            ctx.beginPath();
+                            ctx.moveTo(waterMolecules[i].x, waterMolecules[i].y);
+                            ctx.lineTo(waterMolecules[j].x, waterMolecules[j].y);
+                            
+                            let distToMouse = Math.sqrt(Math.pow(waterMolecules[i].x - mouse.x, 2) + Math.pow(waterMolecules[i].y - mouse.y, 2));
+                            let alpha = (1 - dist / 60) * (distToMouse < 110 ? 0.7 : (isDark ? 0.18 : 0.35));
+                            
+                            ctx.strokeStyle = isDark ? `rgba(16, 185, 129, ${alpha})` : `rgba(13, 148, 136, ${alpha})`;
+                            ctx.setLineDash([2, 3]);
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
+                    }
+                }
+
+                if (mouse.x > 0 && mouse.y > 0) {
+                    drawMicroLigand(mouse.x, mouse.y, isDark);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        animate();
+
+        // Toggle Molecule Animation
+        function toggleMolecules() {
+            moleculesActive = !moleculesActive;
+            const btn = document.getElementById('mol-toggle-btn');
+            const textEl = document.getElementById('mol-toggle-text');
+            
+            if (moleculesActive) {
+                textEl.innerText = isPersian ? 'مولکول‌ها روشن' : 'Molecules On';
+                btn.className = "transition-all duration-300 px-3 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-400 font-medium flex items-center gap-1.5 shadow-sm backdrop-blur-sm";
+            } else {
+                ctx.clearRect(0, 0, width, height);
+                textEl.innerText = isPersian ? 'مولکول‌ها خاموش' : 'Molecules Off';
+                btn.className = "transition-all duration-300 px-3 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-rose-400 font-medium flex items-center gap-1.5 shadow-sm backdrop-blur-sm";
+            }
+        }
+
+        // --- Dynamic Posts Logic ---
+        let postsData = [];
+        let isPersian = false;
+
+        async function fetchPosts() {
+            const container = document.getElementById('posts-container');
+            try {
+                const response = await fetch('posts/posts.json');
+                if (!response.ok) throw new Error('Posts metadata not found');
+                postsData = await response.json();
+                renderPosts();
+            } catch (err) {
+                console.error('Error fetching blog posts:', err);
+                container.innerHTML = `<div class="text-xs text-rose-400">Failed to load posts from /posts/posts.json</div>`;
+            }
+        }
+
+        function renderPosts() {
+            const container = document.getElementById('posts-container');
+            if (!postsData.length) {
+                container.innerHTML = `<div class="text-xs text-secondary">No updates available.</div>`;
+                return;
+            }
+
+            const lang = isPersian ? 'fa' : 'en';
+
+            container.innerHTML = postsData.map(post => `
+                <div class="p-4 rounded-xl bg-brand-500/5 border border-brand-500/20 space-y-2 transition hover:border-brand-500/40">
+                    <div class="flex justify-between items-start gap-4">
+                        <div class="flex items-center gap-2">
+                            ${post.badge ? `<span class="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">${post.badge[lang] || post.badge['en']}</span>` : ''}
+                            <h3 class="text-brand-500 font-bold text-base sm:text-lg">${post.title[lang] || post.title['en']}</h3>
+                        </div>
+                        <span class="text-xs text-secondary font-mono whitespace-nowrap pt-1">${post.date}</span>
+                    </div>
+                    
+                    <p class="text-xs sm:text-sm text-secondary leading-relaxed">
+                        ${post.summary[lang] || post.summary['en']}
+                    </p>
+                    
+                    ${post.link ? `
+                        <div class="pt-2 flex justify-end">
+                            <a href="${post.link}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-500 text-slate-950 hover:bg-brand-400 transition shadow-md">
+                                <span>${post.linkText ? (post.linkText[lang] || post.linkText['en']) : (isPersian ? 'مشاهده' : 'Visit')}</span> <span>↗</span>
+                            </a>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // --- Language & Theme Logic ---
+        function updateClock() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('live-clock').innerText = now.toLocaleString(isPersian ? 'fa-IR' : 'en-US', options);
+            document.getElementById('current-year').innerText = now.getFullYear();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-btn');
+            const isDark = html.classList.contains('dark');
+
+            if (isDark) {
+                html.classList.remove('dark');
+                btn.innerHTML = isPersian ? '<span>🌙 حالت تاریک</span>' : '<span>🌙 Dark Mode</span>';
+            } else {
+                html.classList.add('dark');
+                btn.innerHTML = isPersian ? '<span>☀️ حالت روشن</span>' : '<span>☀️ Light Mode</span>';
+            }
+        }
+
+        function toggleLanguage() {
+            const body = document.body;
+            const html = document.documentElement;
+            const langBtn = document.getElementById('lang-btn');
+            const themeBtn = document.getElementById('theme-btn');
+            const molToggleText = document.getElementById('mol-toggle-text');
+            const aboutText = document.getElementById('about-text');
+            const subTitle = document.getElementById('sub-title');
+            const aboutTitle = document.getElementById('about-title');
+            const updatesTitle = document.getElementById('updates-title');
+            const experienceTitle = document.getElementById('experience-title');
+            const focusTitle = document.getElementById('focus-title');
+            const focusList = document.getElementById('focus-list');
+            const experienceList = document.getElementById('experience-list');
+            const liveFeedBadge = document.getElementById('live-feed-badge');
+            const isDark = html.classList.contains('dark');
+
+            if (!isPersian) {
+                body.classList.add('lang-fa');
+                langBtn.innerText = 'English';
+                themeBtn.innerHTML = isDark ? '<span>☀️ حالت روشن</span>' : '<span>🌙 حالت تاریک</span>';
+                molToggleText.innerText = moleculesActive ? 'مولکول‌ها روشن' : 'مولکول‌ها خاموش';
+                
+                subTitle.innerText = 'دانشجوی دکترای حرفه‌ای داروسازی و پژوهشگر شیمی محاسباتی (CADD)';
+                aboutTitle.innerText = 'درباره من';
+                updatesTitle.innerText = 'آخرین اخبار و یادداشت‌ها';
+                experienceTitle.innerText = 'سوابق علمی و پژوهشی';
+                focusTitle.innerText = 'تمرکز و پژوهش‌های جاری';
+                liveFeedBadge.innerText = '● بروزرسانی‌های زنده';
+                
+                aboutText.innerHTML = `
+                    <p>به عنوان دانشجوی داروسازی در دانشگاه علوم پزشکی مازندران، در نقطه تقاطع علوم دارویی و علوم کامپیوتر فعالیت می‌کنم. مسیر علمی من با پذیرفته شدن در المپیاد کشوری شیمی آغاز شد و در حال حاضر بر روی طراحی محاسباتی دارو (CADD) متمرکز است.</p>
+                    <p>هدف من استفاده از الگوریتم‌ها و یادگیری ماشین (پایتون، RDKit و Pandas) برای انتقال از متدهای سنتی آزمایشگاهی به روش‌های مدرن In-Silico است.</p>
+                `;
+
+                focusList.innerHTML = `
+                    <li>تالیف <strong class="text-primary">کتاب جامع شیمی آلی</strong> ویژه دانشجویان داروسازی.</li>
+                    <li>بررسی روش‌های <strong class="text-primary">اتصال مولکولی In-Silico</strong> با همکاری کمیته تحقیقات دانشجویی.</li>
+                    <li>توسعه پایپ‌لاین‌های خودکار پردازش و استخراج داده با Python و RDKit.</li>
+                `;
+
+                experienceList.innerHTML = `
+                    <div class="border-r-2 border-brand-500 pr-4 space-y-1.5">
+                        <div class="text-base font-bold text-primary">دانشجوی دکترای داروسازی و پژوهشگر</div>
+                        <div class="text-xs sm:text-sm text-brand-500 font-medium">دانشگاه علوم پزشکی مازندران</div>
+                        <p class="text-secondary text-xs sm:text-sm leading-relaxed">تمرکز بر CADD، RDKit، مدلسازی مولکولی و نگارش کتاب شیمی آلی.</p>
+                        <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">شهریور ۱۴۰۳ – تاکنون</span>
+                    </div>
+
+                    <div class="border-r-2 border-gray-700 pr-4 space-y-1.5">
+                        <div class="text-base font-bold text-primary">موسس و مدیر محتوا</div>
+                        <div class="text-xs sm:text-sm text-brand-500 font-medium">Chemical Mood (المپیاد و کنکور)</div>
+                        <p class="text-secondary text-xs sm:text-sm leading-relaxed">پلتفرم آموزشی شیمی برای دانشجویان و داوطلبان المپیاد شیمی و کنکور.</p>
+                        <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">تیر ۱۴۰۳ – تاکنون</span>
+                    </div>
+                `;
+
+                isPersian = true;
+            } else {
+                body.classList.remove('lang-fa');
+                langBtn.innerText = 'فارسی';
+                themeBtn.innerHTML = isDark ? '<span>☀️ Light Mode</span>' : '<span>🌙 Dark Mode</span>';
+                molToggleText.innerText = moleculesActive ? 'Molecules On' : 'Molecules Off';
+                
+                subTitle.innerText = 'Pharm.D Candidate & Computational Drug Discovery Researcher';
+                aboutTitle.innerText = 'About Me';
+                updatesTitle.innerText = 'Latest Updates & Notes';
+                experienceTitle.innerText = 'Experience & Research';
+                focusTitle.innerText = 'Current Focus & Research';
+                liveFeedBadge.innerText = '● Live Feed';
+                
+                aboutText.innerHTML = `
+                    <p>As a Pharm.D. candidate at Mazandaran University of Medical Sciences, I stand at the intersection of pharmaceutical sciences and computer science. My journey began with a passion for chemical logic—leading to my qualification as a National Chemistry Olympiad Semi-Finalist—and has evolved into Computational Drug Discovery (CADD).</p>
+                    <p>I don't just memorize drug structures; I aim to design them using algorithms. I leverage Python, Pandas, and RDKit to transition from traditional "wet lab" approaches to modern "in-silico" methodologies.</p>
+                `;
+
+                focusList.innerHTML = `
+                    <li>Authoring a comprehensive <strong class="text-primary">Organic Chemistry textbook</strong> tailored for pharmacy students.</li>
+                    <li>Investigating <strong class="text-primary">In-Silico target binding</strong> methods with the Student Research Committee.</li>
+                    <li>Developing automated data parsing pipelines using Python and RDKit.</li>
+                `;
+
+                experienceList.innerHTML = `
+                    <div class="border-l-2 border-brand-500 pl-4 space-y-1.5">
+                        <div class="text-base font-bold text-primary">Pharm.D Candidate & Student Researcher</div>
+                        <div class="text-xs sm:text-sm text-brand-500 font-medium">Mazandaran University of Medical Sciences</div>
+                        <p class="text-secondary text-xs sm:text-sm leading-relaxed">Focus on CADD, RDKit, molecular modeling, and authoring an Organic Chemistry textbook.</p>
+                        <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">Sep 2024 – Present</span>
+                    </div>
+
+                    <div class="border-l-2 border-gray-700 pl-4 space-y-1.5">
+                        <div class="text-base font-bold text-primary">Founder & Content Lead</div>
+                        <div class="text-xs sm:text-sm text-brand-500 font-medium">Chemical Mood (Educational Community)</div>
+                        <p class="text-secondary text-xs sm:text-sm leading-relaxed">Open-access platform for organic chemistry guides and national entrance exam mentorship.</p>
+                        <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">Jul 2024 – Present</span>
+                    </div>
+                `;
+
+                isPersian = false;
+            }
+            
+            updateClock();
+            renderPosts(); // بروزرسانی متون پویای وبلاگ در صورت تغییر زبان
+        }
+
+        // Init
+        fetchPosts();
+    </script>
+</body>
+</html>

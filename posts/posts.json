@@ -1,0 +1,44 @@
+[
+  {
+    "id": "ferritin-nanobody-tau",
+    "date": "Aug 2026",
+    "badge": { 
+      "en": "🧪 CADD Research", 
+      "fa": "🧪 پژوهش محاسباتی" 
+    },
+    "title": {
+      "en": "Rational Design & Flexible Docking of an Anti-Seeding Ferritin-Nanobody Fusion Protein Targeting Tau Fibrils",
+      "fa": "طراحی عقلانی و داکینگ انعطاف‌پذیر پروتئین همجوشی نانوبادی-فریتین علیه فیبریل‌های تاو (Tau)"
+    },
+    "summary": {
+      "en": "Investigating in-silico binding interaction dynamics and structural stability of engineered nanobodies targeted at inhibiting Tau fibril propagation in neurodegenerative models.",
+      "fa": "بررسی داکینگ انعطاف‌پذیر و دینامیک اتصالات مولکولی نانوبادی مهندسی‌شده جهت مهار نشر فیبریل‌های تاو (Tau) و جلوگیری از پلاک‌های نورودژنراتیو به روش In-Silico."
+    },
+    "link": "https://github.com/n22xyz",
+    "linkText": {
+      "en": "View Project Archive",
+      "fa": "مشاهده آرشیو پروژه"
+    }
+  },
+  {
+    "id": "microbiology-notes",
+    "date": "Aug 2026",
+    "badge": { 
+      "en": "🚀 Launch", 
+      "fa": "🚀 رونمایی پروژه" 
+    },
+    "title": {
+      "en": "Microbiology Course Notes & Exam Platform Unveiled",
+      "fa": "رونمایی از سامانه جامع جزوات و خلاصه نکات میکروب‌شناسی"
+    },
+    "summary": {
+      "en": "Launched an open educational repository featuring categorized lecture notes, high-yield exam summaries, and structured study guides for microbiology courses.",
+      "fa": "راه اندازی سامانه اختصاصی جهت دسته‌بندی، خلاصه‌نویسی و اشتراک‌گذاری جزوات میکروب‌شناسی، نکات کلیدی امتحانی و منابع طبقه‌بندی شده آموزشی."
+    },
+    "link": "https://your-microbiology-site.github.io",
+    "linkText": {
+      "en": "Visit Notes Platform",
+      "fa": "مشاهده وب‌سایت جزوات"
+    }
+  }
+]
