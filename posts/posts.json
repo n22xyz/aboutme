@@ -14,10 +14,14 @@
       "en": "Investigating in-silico binding interaction dynamics and structural stability of engineered nanobodies targeted at inhibiting Tau fibril propagation in neurodegenerative models.",
       "fa": "بررسی داکینگ انعطاف‌پذیر و دینامیک اتصالات مولکولی نانوبادی مهندسی‌شده جهت مهار نشر فیبریل‌های تاو (Tau) و جلوگیری از پلاک‌های نورودژنراتیو به روش In-Silico."
     },
-    "link": "https://github.com/n22xyz",
+    "content": {
+      "en": "<h3>Project Overview</h3><p>Detailed molecular docking simulations and structural interface characterization of anti-Tau ferritin-nanobody fusions using HADDOCK 2.4 and PyMOL analysis.</p>",
+      "fa": "<h3>توضیحات کامل پروژه</h3><p>در این پروژه، شبیه‌سازی اتصال مولکولی و داکینگ انعطاف‌پذیر سازه همجوشی نانوبادی-فریتین با فیبریل‌های Tau جهت جلوگیری از تجمع پروتئینی بررسی شده است.</p>"
+    },
+    "link": "https://github.com/n22xyz/Tau-Nanobody-Ferritin-Docking",
     "linkText": {
-      "en": "View Project Archive",
-      "fa": "مشاهده آرشیو پروژه"
+      "en": "View GitHub Repository",
+      "fa": "مشاهده ریپازیتوری گیت‌هاب"
     }
   },
   {
@@ -33,12 +37,16 @@
     },
     "summary": {
       "en": "Launched an open educational repository featuring categorized lecture notes, high-yield exam summaries, and structured study guides for microbiology courses.",
-      "fa": "راه اندازی سامانه اختصاصی جهت دسته‌بندی، خلاصه‌نویسی و اشتراک‌گذاری جزوات میکروب‌شناسی، نکات کلیدی امتحانی و منابع طبقه‌بندی شده آموزشی."
+      "fa": "راه‌اندازی سامانه اختصاصی جهت دسته‌بندی، خلاصه‌نویسی و اشتراک‌گذاری جزوات میکروب‌شناسی، نکات کلیدی امتحانی و منابع طبقه‌بندی شده آموزشی."
     },
-    "link": "https://your-microbiology-site.github.io",
+    "content": {
+      "en": "<h3>Platform Overview</h3><p>Comprehensive notes, categorized exam topics, and structured summaries tailored for pharmacy and medical students.</p>",
+      "fa": "<h3>جزئیات وب‌سایت جزوات میکروب‌شناسی</h3><p>در این سامانه می‌توانید به تمامی خلاصه نکات امتحانی، دسته‌بندی‌های موضوعی باکتری‌شناسی و فایل‌های آموزشی مرتب‌شده دسترسی داشته باشید.</p>"
+    },
+    "link": "https://microbiology.forestry.md/",
     "linkText": {
-      "en": "Visit Notes Platform",
-      "fa": "مشاهده وب‌سایت جزوات"
+      "en": "Visit Microbiology Platform",
+      "fa": "مشاهده وب‌سایت میکروب‌شناسی"
     }
   }
 ]
