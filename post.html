@@ -35,6 +35,7 @@
     <style>
         body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; position: relative; }
         
+        /* Background Canvas */
         #cadd-canvas {
             position: fixed;
             top: 0; left: 0;
@@ -43,14 +44,10 @@
             pointer-events: none;
         }
 
-        .content-layer {
-            position: relative;
-            z-index: 10;
-        }
-
-        .lang-fa { font-family: 'Vazirmatn', sans-serif !important; direction: rtl; }
+        .content-layer { position: relative; z-index: 10; }
+        .lang-fa, .lang-fa * { font-family: 'Vazirmatn', sans-serif !important; }
+        .lang-fa { direction: rtl; }
         .lang-fa p { line-height: 2.2 !important; }
-        .lang-fa h1, .lang-fa h2, .lang-fa h3 { font-family: 'Vazirmatn', sans-serif !important; }
 
         .dark body { background-color: #060911; color: #cbd5e1; }
         .dark .card-bg { background-color: rgba(13, 19, 33, 0.82); border-color: #1f2937; backdrop-filter: blur(10px); }
@@ -74,7 +71,6 @@
 
     <div class="content-layer max-w-3xl mx-auto px-6 py-8 min-h-screen flex flex-col justify-between w-full">
 
-        <!-- Top Navigation -->
         <header class="flex justify-between items-center text-xs sm:text-sm mb-10 pb-4 border-b border-gray-800 dark:border-gray-800/80">
             <a href="index.html" class="font-mono font-bold text-brand-500 hover:underline flex items-center gap-2">
                 <span id="back-text">← Back to Home</span>
@@ -93,12 +89,10 @@
             </div>
         </header>
 
-        <!-- Main Post Article Box -->
         <main class="flex-1 card-bg border rounded-2xl p-6 sm:p-9 shadow-2xl relative" id="post-container">
             <div class="animate-pulse text-secondary text-sm">Loading research note...</div>
         </main>
 
-        <!-- Footer -->
         <footer class="mt-12 pt-6 border-t border-gray-800/80 text-xs sm:text-sm text-secondary flex flex-wrap justify-between items-center gap-4">
             <div>© <span id="current-year">2026</span> Nima Payam</div>
             <div class="flex items-center gap-4 sm:gap-5 font-sans">
@@ -114,23 +108,163 @@
         const canvas = document.getElementById('cadd-canvas');
         const ctx = canvas.getContext('2d');
 
-        let width, height, waterMolecules = [], mouse = { x: -1000, y: -1000 }, moleculesActive = true;
+        let width, height;
+        let waterMolecules = [];
+        let mouse = { x: -1000, y: -1000 };
+        let moleculesActive = true;
 
-        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; initMolecules(); }
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initMolecules();
+        }
         window.addEventListener('resize', resize);
-        document.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        }, { passive: true });
 
         class WaterMolecule {
-            constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.vx = (Math.random() - 0.5) * 0.8; this.vy = (Math.random() - 0.5) * 0.8; this.radius = 3.5; this.angle = Math.random() * Math.PI * 2; }
-            update() { let dx = this.x - mouse.x, dy = this.y - mouse.y, dist = Math.sqrt(dx * dx + dy * dy); if (dist < 90) { let force = (90 - dist) / 90, angle = Math.atan2(dy, dx); this.x += Math.cos(angle) * force * 4; this.y += Math.sin(angle) * force * 4; } this.x += this.vx; this.y += this.vy; if (this.x < 0) this.x = width; if (this.x > width) this.x = 0; if (this.y < 0) this.y = height; if (this.y > height) this.y = 0; }
-            draw(isDark) { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = isDark ? 'rgba(239, 68, 68, 0.35)' : 'rgba(220, 38, 38, 0.55)'; ctx.fill(); }
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.radius = 3.5;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                let dx = this.x - mouse.x;
+                let dy = this.y - mouse.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                let hydrophobicZone = 90;
+
+                if (dist < hydrophobicZone) {
+                    let force = (hydrophobicZone - dist) / hydrophobicZone;
+                    let angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * force * 4;
+                    this.y += Math.sin(angle) * force * 4;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+
+            draw(isDark) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = isDark ? 'rgba(239, 68, 68, 0.35)' : 'rgba(220, 38, 38, 0.55)';
+                ctx.fill();
+
+                let h1x = this.x + Math.cos(this.angle) * 6;
+                let h1y = this.y + Math.sin(this.angle) * 6;
+                let h2x = this.x + Math.cos(this.angle + 1.8) * 6;
+                let h2y = this.y + Math.sin(this.angle + 1.8) * 6;
+
+                ctx.beginPath();
+                ctx.arc(h1x, h1y, 1.8, 0, Math.PI * 2);
+                ctx.arc(h2x, h2y, 1.8, 0, Math.PI * 2);
+                ctx.fillStyle = isDark ? 'rgba(248, 250, 252, 0.5)' : 'rgba(51, 65, 85, 0.65)';
+                ctx.fill();
+            }
         }
 
-        function initMolecules() { waterMolecules = []; let count = Math.floor((width * height) / 11000); for (let i = 0; i < count; i++) waterMolecules.push(new WaterMolecule()); }
-        function animate() { ctx.clearRect(0, 0, width, height); const isDark = document.documentElement.classList.contains('dark'); if (moleculesActive) { for (let m of waterMolecules) { m.update(); m.draw(isDark); } } requestAnimationFrame(animate); }
-        resize(); animate();
+        function initMolecules() {
+            waterMolecules = [];
+            let count = Math.floor((width * height) / 11000);
+            for (let i = 0; i < count; i++) {
+                waterMolecules.push(new WaterMolecule());
+            }
+        }
 
-        function toggleMolecules() { moleculesActive = !moleculesActive; document.getElementById('mol-toggle-text').innerText = moleculesActive ? (isPersian ? 'مولکول‌ها روشن' : 'Molecules On') : (isPersian ? 'مولکول‌ها خاموش' : 'Molecules Off'); }
+        function drawMicroLigand(x, y, isDark) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.9)' : 'rgba(5, 150, 105, 0.9)';
+            ctx.fillStyle = isDark ? 'rgba(16, 185, 129, 0.95)' : 'rgba(5, 150, 105, 0.95)';
+            ctx.lineWidth = 1.8;
+
+            let r = 9;
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                let a = (Math.PI / 3) * i;
+                let px = r * Math.cos(a);
+                let py = r * Math.sin(a);
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            const isDark = document.documentElement.classList.contains('dark');
+
+            if (moleculesActive) {
+                for (let i = 0; i < waterMolecules.length; i++) {
+                    waterMolecules[i].update();
+                    waterMolecules[i].draw(isDark);
+
+                    for (let j = i + 1; j < waterMolecules.length; j++) {
+                        let dx = waterMolecules[i].x - waterMolecules[j].x;
+                        let dy = waterMolecules[i].y - waterMolecules[j].y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 60) {
+                            ctx.beginPath();
+                            ctx.moveTo(waterMolecules[i].x, waterMolecules[i].y);
+                            ctx.lineTo(waterMolecules[j].x, waterMolecules[j].y);
+                            
+                            let distToMouse = Math.sqrt(Math.pow(waterMolecules[i].x - mouse.x, 2) + Math.pow(waterMolecules[i].y - mouse.y, 2));
+                            let alpha = (1 - dist / 60) * (distToMouse < 110 ? 0.7 : (isDark ? 0.18 : 0.35));
+                            
+                            ctx.strokeStyle = isDark ? `rgba(16, 185, 129, ${alpha})` : `rgba(13, 148, 136, ${alpha})`;
+                            ctx.setLineDash([2, 3]);
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
+                    }
+                }
+
+                if (mouse.x > 0 && mouse.y > 0) {
+                    drawMicroLigand(mouse.x, mouse.y, isDark);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        animate();
+
+        function toggleMolecules() {
+            moleculesActive = !moleculesActive;
+            const btn = document.getElementById('mol-toggle-btn');
+            const textEl = document.getElementById('mol-toggle-text');
+            
+            if (moleculesActive) {
+                textEl.innerText = isPersian ? 'مولکول‌ها روشن' : 'Molecules On';
+                btn.className = "transition-all duration-300 px-3 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-400 font-medium flex items-center gap-1.5 shadow-sm backdrop-blur-sm";
+            } else {
+                ctx.clearRect(0, 0, width, height);
+                textEl.innerText = isPersian ? 'مولکول‌ها خاموش' : 'Molecules Off';
+                btn.className = "transition-all duration-300 px-3 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-rose-400 font-medium flex items-center gap-1.5 shadow-sm backdrop-blur-sm";
+            }
+        }
 
         let isPersian = localStorage.getItem('lang') === 'fa';
         let currentPost = null;
@@ -154,6 +288,7 @@
                 renderPost();
 
             } catch (err) {
+                console.error('Post detail load error:', err);
                 container.innerHTML = `<h1 class="text-rose-500 font-bold text-xl">Error loading article details.</h1>`;
             }
         }
@@ -165,7 +300,6 @@
 
             document.title = `${currentPost.title[lang] || currentPost.title['en']} | Nima Payam`;
 
-            // Display exact date AND time timestamp
             const displayTime = currentPost.timestamp ? (currentPost.timestamp[lang] || currentPost.timestamp['en']) : currentPost.date;
 
             container.innerHTML = `
@@ -210,6 +344,7 @@
             const html = document.documentElement;
             const langBtn = document.getElementById('lang-btn');
             const themeBtn = document.getElementById('theme-btn');
+            const molToggleText = document.getElementById('mol-toggle-text');
             const backText = document.getElementById('back-text');
             const isDark = html.classList.contains('dark');
 
@@ -217,11 +352,13 @@
                 body.classList.add('lang-fa');
                 langBtn.innerText = 'English';
                 themeBtn.innerHTML = isDark ? '<span>☀️ حالت روشن</span>' : '<span>🌙 حالت تاریک</span>';
+                molToggleText.innerText = moleculesActive ? 'مولکول‌ها روشن' : 'مولکول‌ها خاموش';
                 backText.innerText = '← بازگشت به صفحه اصلی';
             } else {
                 body.classList.remove('lang-fa');
                 langBtn.innerText = 'فارسی';
                 themeBtn.innerHTML = isDark ? '<span>☀️ Light Mode</span>' : '<span>🌙 Dark Mode</span>';
+                molToggleText.innerText = moleculesActive ? 'Molecules On' : 'Molecules Off';
                 backText.innerText = '← Back to Home';
             }
             
@@ -229,7 +366,6 @@
         }
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
-        
         loadPost();
         if (isPersian) toggleLanguage();
     </script>
