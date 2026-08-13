@@ -35,7 +35,6 @@
     <style>
         body { font-family: 'JetBrains Mono', monospace; overflow-x: hidden; position: relative; }
         
-        /* Background Canvas */
         #cadd-canvas {
             position: fixed;
             top: 0; left: 0;
@@ -44,18 +43,11 @@
             pointer-events: none;
         }
 
-        /* Content Layer over Canvas */
-        .content-layer {
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Typography for Persian RTL */
-        .lang-fa { font-family: 'Vazirmatn', sans-serif !important; direction: rtl; }
+        .content-layer { position: relative; z-index: 10; }
+        .lang-fa, .lang-fa * { font-family: 'Vazirmatn', sans-serif !important; }
+        .lang-fa { direction: rtl; }
         .lang-fa p { line-height: 2 !important; }
-        .lang-fa h1, .lang-fa h2, .lang-fa h3 { font-family: 'Vazirmatn', sans-serif !important; }
 
-        /* Dark / Light Mode Styles */
         .dark body { background-color: #060911; color: #cbd5e1; }
         .dark .card-bg { background-color: rgba(13, 19, 33, 0.82); border-color: #1f2937; backdrop-filter: blur(10px); }
         .dark .text-primary { color: #f9fafb; }
@@ -69,13 +61,10 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between transition-colors duration-200">
 
-    <!-- Background Canvas -->
     <canvas id="cadd-canvas"></canvas>
 
-    <!-- Content Container Layer -->
     <div class="content-layer max-w-3xl mx-auto px-6 py-8 min-h-screen flex flex-col justify-between w-full">
 
-        <!-- Top Navigation & Live Clock -->
         <header class="flex justify-between items-center text-xs sm:text-sm mb-10 pb-4 border-b border-gray-800 dark:border-gray-800/80">
             <a href="index.html" class="font-mono font-bold text-brand-500 hover:underline flex items-center gap-2">
                 <span id="back-text">← Back to Home</span>
@@ -102,7 +91,7 @@
                     </h1>
                 </div>
 
-                <input type="text" id="search-input" onkeyup="filterPosts()" placeholder="Search articles by title or keyword..." class="w-full card-bg border border-brand-500/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 text-primary transition">
+                <input type="text" id="search-input" oninput="filterPosts()" placeholder="Search articles by title or keyword..." class="w-full card-bg border border-brand-500/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 text-primary transition shadow-inner">
 
                 <div id="posts-container" class="space-y-4 text-sm pt-2">
                     <div class="text-xs text-secondary animate-pulse">Loading archive...</div>
@@ -121,7 +110,6 @@
 
     </div>
 
-    <!-- Canvas Engine & Interactive Scripts -->
     <script>
         const canvas = document.getElementById('cadd-canvas');
         const ctx = canvas.getContext('2d');
@@ -137,10 +125,11 @@
             initMolecules();
         }
         window.addEventListener('resize', resize);
-        document.addEventListener('mousemove', (e) => {
+        
+        window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-        });
+        }, { passive: true });
 
         class WaterMolecule {
             constructor() {
@@ -304,10 +293,7 @@
             container.innerHTML = data.map(post => `
                 <a href="post.html?id=${post.id}" class="block p-4 rounded-xl bg-brand-500/5 border border-brand-500/20 space-y-2 transition hover:border-brand-500/50 group">
                     <div class="flex justify-between items-start gap-4">
-                        <div class="flex items-center gap-2">
-                            ${post.badge ? `<span class="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">${post.badge[lang] || post.badge['en']}</span>` : ''}
-                            <h3 class="text-brand-500 font-bold text-base sm:text-lg group-hover:underline">${post.title[lang] || post.title['en']}</h3>
-                        </div>
+                        <h3 class="text-brand-500 font-bold text-base sm:text-lg group-hover:underline">${post.title[lang] || post.title['en']}</h3>
                         <span class="text-xs text-secondary font-mono pt-1 whitespace-nowrap">${post.date}</span>
                     </div>
                     <p class="text-xs sm:text-sm text-secondary leading-relaxed">${post.summary[lang] || post.summary['en']}</p>
@@ -316,13 +302,24 @@
         }
 
         function filterPosts() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const lang = isPersian ? 'fa' : 'en';
-            const filtered = postsData.filter(post => 
-                (post.title[lang] && post.title[lang].toLowerCase().includes(query)) || 
-                (post.summary[lang] && post.summary[lang].toLowerCase().includes(query)) ||
-                (post.title['en'] && post.title['en'].toLowerCase().includes(query))
-            );
+            const input = document.getElementById('search-input');
+            if (!input) return;
+            const query = input.value.trim().toLowerCase();
+
+            if (query === "") {
+                renderPosts(postsData);
+                return;
+            }
+
+            const filtered = postsData.filter(post => {
+                const titleEn = post.title && post.title['en'] ? post.title['en'].toLowerCase() : '';
+                const titleFa = post.title && post.title['fa'] ? post.title['fa'].toLowerCase() : '';
+                const summaryEn = post.summary && post.summary['en'] ? post.summary['en'].toLowerCase() : '';
+                const summaryFa = post.summary && post.summary['fa'] ? post.summary['fa'].toLowerCase() : '';
+
+                return titleEn.includes(query) || titleFa.includes(query) || summaryEn.includes(query) || summaryFa.includes(query);
+            });
+
             renderPosts(filtered);
         }
 
@@ -336,7 +333,7 @@
             isPersian = !isPersian;
             localStorage.setItem('lang', isPersian ? 'fa' : 'en');
             updateUI();
-            renderPosts(postsData);
+            filterPosts();
         }
 
         function updateUI() {
@@ -350,8 +347,8 @@
         }
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
-        updateUI();
         fetchPosts();
+        if (isPersian) toggleLanguage();
     </script>
 </body>
 </html>
