@@ -60,6 +60,11 @@
         .lang-fa { direction: rtl; }
         .lang-fa p { line-height: 2 !important; }
 
+        /* Persian font class explicitly for the Farsi button */
+        .font-vazir {
+            font-family: 'Vazirmatn', sans-serif !important;
+        }
+
         /* Dark / Light Mode Styles */
         .dark body { background-color: #060911; color: #cbd5e1; }
         .dark .card-bg { background-color: rgba(13, 19, 33, 0.82); border-color: #1f2937; backdrop-filter: blur(10px); }
@@ -82,13 +87,13 @@
 
         <!-- Top Navigation & Live Clock -->
         <header class="flex justify-between items-center text-xs sm:text-sm mb-10 pb-4 border-b border-gray-800 dark:border-gray-800/80 relative">
-            <!-- Clock Typography -->
-            <div id="live-clock" class="font-mono text-brand-500 font-bold tracking-wider text-xs sm:text-sm">--:--:-- --</div>
+            <!-- Clock Typography - Single line fitted -->
+            <div id="live-clock" class="font-mono text-brand-500 font-bold tracking-wider text-xs sm:text-sm whitespace-nowrap">--:--:-- --</div>
             
             <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
                 <!-- Search Button & Floating Dropdown Container -->
                 <div class="relative">
-                    <button onclick="toggleSearchMenu()" class="transition-all duration-200 px-3 py-1 rounded-lg bg-gray-800/40 hover:bg-gray-800/80 border border-gray-700/60 text-gray-300 font-mono flex items-center gap-1.5 shadow-sm">
+                    <button onclick="toggleSearchMenu()" class="transition-all duration-200 px-3 py-1.5 rounded-lg bg-gray-800/40 hover:bg-gray-800/80 border border-gray-700/60 text-gray-300 font-mono flex items-center gap-1.5 shadow-sm whitespace-nowrap">
                         <span>🔍</span> <span id="search-btn-text">Search</span>
                     </button>
 
@@ -103,20 +108,20 @@
 
                 <span class="text-gray-700 dark:text-gray-800">|</span>
 
-                <!-- Molecule Toggle Button (Restored exact compact style) -->
-                <button onclick="toggleMolecules()" id="mol-toggle-btn" class="transition-all duration-300 px-3 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 font-mono font-medium flex items-center gap-2 shadow-sm backdrop-blur-sm whitespace-nowrap">
+                <!-- Molecule Toggle Button -->
+                <button onclick="toggleMolecules()" id="mol-toggle-btn" class="transition-all duration-300 px-3 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 font-mono font-medium flex items-center gap-2 shadow-sm backdrop-blur-sm whitespace-nowrap">
                     <span>⚛️</span> <span id="mol-toggle-text">Molecules On</span>
                 </button>
 
                 <span class="text-gray-700 dark:text-gray-800">|</span>
 
-                <!-- Persian Toggle Button -->
-                <button onclick="toggleLanguage()" id="lang-btn" class="hover:text-brand-400 font-semibold transition px-2.5 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-500">فارسی</button>
+                <!-- Persian Toggle Button with Vazirmatn Font Forced -->
+                <button onclick="toggleLanguage()" id="lang-btn" class="font-vazir hover:text-brand-400 font-semibold transition px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-500 whitespace-nowrap">فارسی</button>
 
                 <span class="text-gray-700 dark:text-gray-800">|</span>
 
-                <!-- Theme Toggle Button -->
-                <button onclick="toggleTheme()" id="theme-btn" class="hover:text-brand-500 font-medium transition flex items-center gap-1.5 px-2 py-1">
+                <!-- Theme Toggle Button - Fixed single line & padding -->
+                <button onclick="toggleTheme()" id="theme-btn" class="hover:text-brand-500 font-medium font-mono transition flex items-center gap-1.5 px-2.5 py-1.5 whitespace-nowrap">
                     <span>☀️ Light Mode</span>
                 </button>
             </div>
@@ -380,11 +385,11 @@
             
             if (moleculesActive) {
                 textEl.innerText = isPersian ? 'مولکول‌ها روشن' : 'Molecules On';
-                btn.className = "transition-all duration-300 px-3 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 font-mono font-medium flex items-center gap-2 shadow-sm backdrop-blur-sm whitespace-nowrap";
+                btn.className = "transition-all duration-300 px-3 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 font-mono font-medium flex items-center gap-2 shadow-sm backdrop-blur-sm whitespace-nowrap";
             } else {
                 ctx.clearRect(0, 0, width, height);
                 textEl.innerText = isPersian ? 'مولکول‌ها خاموش' : 'Molecules Off';
-                btn.className = "transition-all duration-300 px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-mono font-medium flex items-center gap-2 shadow-sm backdrop-blur-sm whitespace-nowrap";
+                btn.className = "transition-all duration-300 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-mono font-medium flex items-center gap-2 shadow-sm backdrop-blur-sm whitespace-nowrap";
             }
         }
 
@@ -480,6 +485,7 @@
             }
         });
 
+        // Fixed Live Clock - Clean single line formatting
         function updateClock() {
             const now = new Date();
             const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
