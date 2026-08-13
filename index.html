@@ -12,6 +12,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); }
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -80,6 +81,11 @@
             <div id="live-clock" class="font-mono text-brand-500 font-bold tracking-wider text-xs sm:text-sm">--:--:-- --</div>
             
             <div class="flex items-center gap-2 sm:gap-3 font-sans text-xs sm:text-sm">
+                <!-- Search Button -->
+                <button onclick="toggleSearch()" class="hover:text-brand-500 font-medium transition px-2 py-1 rounded bg-gray-800/30 text-secondary hover:text-primary flex items-center gap-1" title="Search Notes">
+                    🔍 <span class="hidden sm:inline" id="search-btn-text">Search</span>
+                </button>
+                <span class="text-gray-600">|</span>
                 <!-- Soft Blue Molecule Toggle Button -->
                 <button onclick="toggleMolecules()" id="mol-toggle-btn" class="transition-all duration-300 px-3 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-400 font-medium flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
                     <span>⚛️</span> <span id="mol-toggle-text">Molecules On</span>
@@ -92,6 +98,11 @@
                 </button>
             </div>
         </header>
+
+        <!-- Dynamic Search Input Box -->
+        <div id="search-box" class="hidden mb-8 transition-all">
+            <input type="text" id="search-input" onkeyup="filterPosts()" placeholder="Search in updates & research notes..." class="w-full card-bg border border-brand-500/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 text-primary shadow-lg">
+        </div>
 
         <!-- Main Content -->
         <main class="space-y-8 flex-1">
@@ -139,7 +150,7 @@
                 </ul>
             </section>
 
-            <!-- Live Updates Feed (Dynamic from posts/posts.json) -->
+            <!-- Live Updates Feed Section (Shows Top 3 Latest Posts) -->
             <section class="card-bg border rounded-2xl p-6 sm:p-7 space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-base sm:text-lg font-bold text-primary flex items-center gap-2">
@@ -150,6 +161,13 @@
                 
                 <div id="posts-container" class="space-y-4 text-sm">
                     <div class="text-xs text-secondary animate-pulse">Loading updates...</div>
+                </div>
+
+                <!-- Link to Full Archive Page -->
+                <div class="pt-2 flex justify-end border-t border-gray-800/40">
+                    <a href="archive.html" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-500 hover:text-brand-400 font-mono transition pt-1">
+                        <span id="view-all-text">View All Notes & Archive →</span>
+                    </a>
                 </div>
             </section>
 
@@ -191,7 +209,7 @@
 
     <!-- Canvas Engine & Interactive Scripts -->
     <script>
-        // --- Canvas Molecule Engine (Exactly Original Code) ---
+        // --- ORIGINAL CANVAS MOLECULE ENGINE (Unchanged & Exact) ---
         const canvas = document.getElementById('cadd-canvas');
         const ctx = canvas.getContext('2d');
 
@@ -337,7 +355,6 @@
         resize();
         animate();
 
-        // Toggle Molecule Animation
         function toggleMolecules() {
             moleculesActive = !moleculesActive;
             const btn = document.getElementById('mol-toggle-btn');
@@ -353,9 +370,9 @@
             }
         }
 
-        // --- Dynamic Posts Logic ---
+        // --- Dynamic Posts & Search Logic ---
         let postsData = [];
-        let isPersian = false;
+        let isPersian = localStorage.getItem('lang') === 'fa';
 
         async function fetchPosts() {
             const container = document.getElementById('posts-container');
@@ -363,28 +380,29 @@
                 const response = await fetch('posts/posts.json');
                 if (!response.ok) throw new Error('Posts metadata not found');
                 postsData = await response.json();
-                renderPosts();
+                // Render ONLY Top 3 Latest Posts
+                renderPosts(postsData.slice(0, 3));
             } catch (err) {
                 console.error('Error fetching blog posts:', err);
                 container.innerHTML = `<div class="text-xs text-rose-400">Failed to load posts from /posts/posts.json</div>`;
             }
         }
 
-        function renderPosts() {
+        function renderPosts(data) {
             const container = document.getElementById('posts-container');
-            if (!postsData.length) {
-                container.innerHTML = `<div class="text-xs text-secondary">No updates available.</div>`;
+            if (!data.length) {
+                container.innerHTML = `<div class="text-xs text-secondary">${isPersian ? 'موردی یافت نشد.' : 'No updates found.'}</div>`;
                 return;
             }
 
             const lang = isPersian ? 'fa' : 'en';
 
-            container.innerHTML = postsData.map(post => `
-                <div class="p-4 rounded-xl bg-brand-500/5 border border-brand-500/20 space-y-2 transition hover:border-brand-500/40">
+            container.innerHTML = data.map(post => `
+                <a href="post.html?id=${post.id}" class="block p-4 rounded-xl bg-brand-500/5 border border-brand-500/20 space-y-2 transition hover:border-brand-500/50 group">
                     <div class="flex justify-between items-start gap-4">
                         <div class="flex items-center gap-2">
                             ${post.badge ? `<span class="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">${post.badge[lang] || post.badge['en']}</span>` : ''}
-                            <h3 class="text-brand-500 font-bold text-base sm:text-lg">${post.title[lang] || post.title['en']}</h3>
+                            <h3 class="text-brand-500 font-bold text-base sm:text-lg group-hover:underline">${post.title[lang] || post.title['en']}</h3>
                         </div>
                         <span class="text-xs text-secondary font-mono whitespace-nowrap pt-1">${post.date}</span>
                     </div>
@@ -393,15 +411,30 @@
                         ${post.summary[lang] || post.summary['en']}
                     </p>
                     
-                    ${post.link ? `
-                        <div class="pt-2 flex justify-end">
-                            <a href="${post.link}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-500 text-slate-950 hover:bg-brand-400 transition shadow-md">
-                                <span>${post.linkText ? (post.linkText[lang] || post.linkText['en']) : (isPersian ? 'مشاهده' : 'Visit')}</span> <span>↗</span>
-                            </a>
-                        </div>
-                    ` : ''}
-                </div>
+                    <span class="inline-block text-xs text-brand-400 font-semibold pt-1 group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1">
+                        ${isPersian ? 'مطالعه کامل مقاله ←' : 'Read Article →'}
+                    </span>
+                </a>
             `).join('');
+        }
+
+        function toggleSearch() {
+            const box = document.getElementById('search-box');
+            box.classList.toggle('hidden');
+            if (!box.classList.contains('hidden')) {
+                document.getElementById('search-input').focus();
+            }
+        }
+
+        function filterPosts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const lang = isPersian ? 'fa' : 'en';
+            const filtered = postsData.filter(post => 
+                (post.title[lang] && post.title[lang].toLowerCase().includes(query)) || 
+                (post.summary[lang] && post.summary[lang].toLowerCase().includes(query)) ||
+                (post.title['en'] && post.title['en'].toLowerCase().includes(query))
+            );
+            renderPosts(filtered.slice(0, 3));
         }
 
         // --- Language & Theme Logic ---
@@ -417,18 +450,16 @@
         function toggleTheme() {
             const html = document.documentElement;
             const btn = document.getElementById('theme-btn');
-            const isDark = html.classList.contains('dark');
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
 
-            if (isDark) {
-                html.classList.remove('dark');
-                btn.innerHTML = isPersian ? '<span>🌙 حالت تاریک</span>' : '<span>🌙 Dark Mode</span>';
-            } else {
-                html.classList.add('dark');
-                btn.innerHTML = isPersian ? '<span>☀️ حالت روشن</span>' : '<span>☀️ Light Mode</span>';
-            }
+            btn.innerHTML = isDark ? (isPersian ? '<span>☀️ حالت روشن</span>' : '<span>☀️ Light Mode</span>') : (isPersian ? '<span>🌙 حالت تاریک</span>' : '<span>🌙 Dark Mode</span>');
         }
 
         function toggleLanguage() {
+            isPersian = !isPersian;
+            localStorage.setItem('lang', isPersian ? 'fa' : 'en');
+            
             const body = document.body;
             const html = document.documentElement;
             const langBtn = document.getElementById('lang-btn');
@@ -443,13 +474,17 @@
             const focusList = document.getElementById('focus-list');
             const experienceList = document.getElementById('experience-list');
             const liveFeedBadge = document.getElementById('live-feed-badge');
+            const searchBtnText = document.getElementById('search-btn-text');
+            const viewAllText = document.getElementById('view-all-text');
             const isDark = html.classList.contains('dark');
 
-            if (!isPersian) {
+            if (isPersian) {
                 body.classList.add('lang-fa');
                 langBtn.innerText = 'English';
                 themeBtn.innerHTML = isDark ? '<span>☀️ حالت روشن</span>' : '<span>🌙 حالت تاریک</span>';
                 molToggleText.innerText = moleculesActive ? 'مولکول‌ها روشن' : 'مولکول‌ها خاموش';
+                searchBtnText.innerText = 'جستجو';
+                viewAllText.innerText = 'مشاهده همه یادداشت‌ها و آرشیو ←';
                 
                 subTitle.innerText = 'دانشجوی دکترای حرفه‌ای داروسازی و پژوهشگر شیمی محاسباتی (CADD)';
                 aboutTitle.innerText = 'درباره من';
@@ -484,13 +519,13 @@
                         <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">تیر ۱۴۰۳ – تاکنون</span>
                     </div>
                 `;
-
-                isPersian = true;
             } else {
                 body.classList.remove('lang-fa');
                 langBtn.innerText = 'فارسی';
                 themeBtn.innerHTML = isDark ? '<span>☀️ Light Mode</span>' : '<span>🌙 Dark Mode</span>';
                 molToggleText.innerText = moleculesActive ? 'Molecules On' : 'Molecules Off';
+                searchBtnText.innerText = 'Search';
+                viewAllText.innerText = 'View All Notes & Archive →';
                 
                 subTitle.innerText = 'Pharm.D Candidate & Computational Drug Discovery Researcher';
                 aboutTitle.innerText = 'About Me';
@@ -525,16 +560,15 @@
                         <span class="text-xs font-mono text-secondary opacity-75 inline-block pt-1">Jul 2024 – Present</span>
                     </div>
                 `;
-
-                isPersian = false;
             }
             
             updateClock();
-            renderPosts(); // بروزرسانی متون پویای وبلاگ در صورت تغییر زبان
+            renderPosts(postsData.slice(0, 3));
         }
 
         // Init
         fetchPosts();
+        if (isPersian) toggleLanguage();
     </script>
 </body>
 </html>
