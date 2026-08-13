@@ -78,14 +78,25 @@
     <div class="content-layer max-w-3xl mx-auto px-6 py-8 min-h-screen flex flex-col justify-between w-full">
 
         <!-- Top Navigation & Live Clock -->
-        <header class="flex justify-between items-center text-xs sm:text-sm mb-10 pb-4 border-b border-gray-800 dark:border-gray-800/80">
+        <header class="flex justify-between items-center text-xs sm:text-sm mb-10 pb-4 border-b border-gray-800 dark:border-gray-800/80 relative">
             <div id="live-clock" class="font-mono text-brand-500 font-bold tracking-wider text-xs sm:text-sm">--:--:-- --</div>
             
             <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                <!-- Search Button -->
-                <button onclick="toggleSearch()" class="hover:text-brand-500 font-medium transition px-2 py-1 rounded bg-gray-800/30 text-secondary hover:text-primary flex items-center gap-1" title="Search Notes">
-                    🔍 <span id="search-btn-text">Search</span>
-                </button>
+                <!-- Search Button & Floating Dropdown Container -->
+                <div class="relative">
+                    <button onclick="toggleSearchMenu()" class="hover:text-brand-500 font-medium transition px-2.5 py-1 rounded bg-gray-800/40 text-secondary hover:text-primary flex items-center gap-1.5 border border-gray-700/50">
+                        🔍 <span id="search-btn-text">Search</span>
+                    </button>
+
+                    <!-- Header Live Search Dropdown -->
+                    <div id="search-dropdown" class="hidden absolute right-0 rtl:right-auto rtl:left-0 top-10 w-72 sm:w-80 card-bg border border-brand-500/40 rounded-xl p-3 shadow-2xl z-50">
+                        <input type="text" id="search-dropdown-input" oninput="liveHeaderSearch()" placeholder="Search notes..." class="w-full bg-slate-900/90 dark:bg-slate-950/90 border border-brand-500/30 rounded-lg px-3 py-2 text-xs text-primary focus:outline-none focus:border-brand-500 mb-2">
+                        <div id="search-results-list" class="max-h-56 overflow-y-auto space-y-1.5 text-xs">
+                            <div class="text-secondary opacity-60 px-1 py-1">Type to search notes...</div>
+                        </div>
+                    </div>
+                </div>
+
                 <span class="text-gray-600">|</span>
                 <!-- Soft Blue Molecule Toggle Button -->
                 <button onclick="toggleMolecules()" id="mol-toggle-btn" class="transition-all duration-300 px-3 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-400 font-medium flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
@@ -99,11 +110,6 @@
                 </button>
             </div>
         </header>
-
-        <!-- Search Input Box -->
-        <div id="search-box" class="hidden mb-8 transition-all">
-            <input type="text" id="search-input" oninput="filterPosts()" placeholder="Search in updates & research notes..." class="w-full card-bg border border-brand-500/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 text-primary shadow-lg">
-        </div>
 
         <!-- Main Content -->
         <main class="space-y-8 flex-1">
@@ -371,7 +377,7 @@
             }
         }
 
-        // --- Dynamic Posts & Fixed Search Logic ---
+        // --- Posts Data & Live Header Dropdown Search Logic ---
         let postsData = [];
         let isPersian = localStorage.getItem('lang') === 'fa';
 
@@ -397,7 +403,6 @@
 
             const lang = isPersian ? 'fa' : 'en';
 
-            // Cleaned-up card rendering WITHOUT the badge box on index page
             container.innerHTML = data.map(post => `
                 <a href="post.html?id=${post.id}" class="block p-4 rounded-xl bg-brand-500/5 border border-brand-500/20 space-y-2 transition hover:border-brand-500/50 group">
                     <div class="flex justify-between items-start gap-4">
@@ -416,36 +421,52 @@
             `).join('');
         }
 
-        function toggleSearch() {
-            const box = document.getElementById('search-box');
-            box.classList.toggle('hidden');
-            if (!box.classList.contains('hidden')) {
-                document.getElementById('search-input').focus();
+        function toggleSearchMenu() {
+            const menu = document.getElementById('search-dropdown');
+            menu.classList.toggle('hidden');
+            if (!menu.classList.contains('hidden')) {
+                const input = document.getElementById('search-dropdown-input');
+                input.focus();
             }
         }
 
-        function filterPosts() {
-            const input = document.getElementById('search-input');
-            if (!input) return;
-            const query = input.value.trim().toLowerCase();
+        function liveHeaderSearch() {
+            const query = document.getElementById('search-dropdown-input').value.trim().toLowerCase();
+            const resultsContainer = document.getElementById('search-results-list');
             const lang = isPersian ? 'fa' : 'en';
 
-            if (query === "") {
-                renderPosts(postsData.slice(0, 3));
+            if (!query) {
+                resultsContainer.innerHTML = `<div class="text-secondary opacity-60 px-1 py-1">${isPersian ? 'برای جستجو تایپ کنید...' : 'Type to search notes...'}</div>`;
                 return;
             }
 
             const filtered = postsData.filter(post => {
-                const titleEn = post.title && post.title['en'] ? post.title['en'].toLowerCase() : '';
-                const titleFa = post.title && post.title['fa'] ? post.title['fa'].toLowerCase() : '';
-                const summaryEn = post.summary && post.summary['en'] ? post.summary['en'].toLowerCase() : '';
-                const summaryFa = post.summary && post.summary['fa'] ? post.summary['fa'].toLowerCase() : '';
-
-                return titleEn.includes(query) || titleFa.includes(query) || summaryEn.includes(query) || summaryFa.includes(query);
+                const title = (post.title[lang] || post.title['en'] || '').toLowerCase();
+                const summary = (post.summary[lang] || post.summary['en'] || '').toLowerCase();
+                return title.includes(query) || summary.includes(query);
             });
 
-            renderPosts(filtered);
+            if (!filtered.length) {
+                resultsContainer.innerHTML = `<div class="text-rose-400 px-1 py-1">${isPersian ? 'نتیجه‌ای یافت نشد' : 'No results found'}</div>`;
+                return;
+            }
+
+            resultsContainer.innerHTML = filtered.map(post => `
+                <a href="post.html?id=${post.id}" class="block p-2 rounded-lg bg-gray-800/50 hover:bg-brand-500/20 border border-gray-700/40 hover:border-brand-500/40 transition">
+                    <div class="font-bold text-brand-400 truncate">${post.title[lang] || post.title['en']}</div>
+                    <div class="text-[10px] text-secondary opacity-80">${post.date}</div>
+                </a>
+            `).join('');
         }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('search-dropdown');
+            const btn = e.target.closest('button[onclick="toggleSearchMenu()"]');
+            if (dropdown && !dropdown.contains(e.target) && !btn) {
+                dropdown.classList.add('hidden');
+            }
+        });
 
         function updateClock() {
             const now = new Date();
@@ -485,7 +506,7 @@
             const liveFeedBadge = document.getElementById('live-feed-badge');
             const searchBtnText = document.getElementById('search-btn-text');
             const viewAllText = document.getElementById('view-all-text');
-            const searchInput = document.getElementById('search-input');
+            const dropdownInput = document.getElementById('search-dropdown-input');
             const isDark = html.classList.contains('dark');
 
             if (isPersian) {
@@ -495,7 +516,7 @@
                 molToggleText.innerText = moleculesActive ? 'مولکول‌ها روشن' : 'مولکول‌ها خاموش';
                 searchBtnText.innerText = 'جستجو';
                 viewAllText.innerText = 'مشاهده همه یادداشت‌ها و آرشیو ←';
-                if(searchInput) searchInput.placeholder = 'جستجوی مقاله بر اساس عنوان یا کلیدواژه...';
+                if(dropdownInput) dropdownInput.placeholder = 'جستجوی یادداشت‌ها...';
                 
                 subTitle.innerText = 'دانشجوی دکترای حرفه‌ای داروسازی و پژوهشگر شیمی محاسباتی (CADD)';
                 aboutTitle.innerText = 'درباره من';
@@ -537,7 +558,7 @@
                 molToggleText.innerText = moleculesActive ? 'Molecules On' : 'Molecules Off';
                 searchBtnText.innerText = 'Search';
                 viewAllText.innerText = 'View All Notes & Archive →';
-                if(searchInput) searchInput.placeholder = 'Search in updates & research notes...';
+                if(dropdownInput) dropdownInput.placeholder = 'Search notes...';
                 
                 subTitle.innerText = 'Pharm.D Candidate & Computational Drug Discovery Researcher';
                 aboutTitle.innerText = 'About Me';
@@ -575,7 +596,7 @@
             }
             
             updateClock();
-            filterPosts();
+            renderPosts(postsData.slice(0, 3));
         }
 
         fetchPosts();
